@@ -41,3 +41,7 @@ urlpatterns = [
 # add media url
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# add static url
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
