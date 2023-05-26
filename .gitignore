@@ -1,0 +1,14 @@
+./venv/
+/venv/
+/venv/bin/
+/venv/bin/activate
+.idea/
+/.idea/
+/covers/
+/covers/*
+images/
+images/*
+icons/
+icons/*
+/__pycache__/
+/__pycache__/*
