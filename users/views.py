@@ -3,6 +3,11 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 class PackageListView(generics.ListAPIView):

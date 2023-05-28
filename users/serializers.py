@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from .models import *
 
 
@@ -22,9 +24,16 @@ class AdvertiserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class InvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     account_type = AccountTypeSerializer(read_only=True)
     advertiser = AdvertiserSerializer(read_only=True)
+    invoices = InvoiceSerializer(read_only=True, many=True)
 
     class Meta:
         model = User
@@ -56,3 +65,10 @@ class CreateUserSerializer(serializers.ModelSerializer):
         user.advertiser = Advertiser.objects.get(id=advertiser)
         user.save()
         return user
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data['user'] = UserSerializer(self.user).data
+        return data
