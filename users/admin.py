@@ -9,15 +9,20 @@ from .models import *
 
 class MyUserAdmin(UserAdmin):
     model = User
-    list_display = ['username', 'email', 'first_name', 'last_name', 'account_type', 'is_advertiser']
-    fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('account_type', 'is_advertiser', 'advertiser', 'image', 'blocked', 'invoices')}),
+    list_display = ['username', 'account_type', 'is_advertiser']
+    fieldsets = (
+        ['User', {'fields': ('username', 'password')}],
+        ('Personal info', {'fields': ('phone', 'image')}),
+        ('Sakan', {'fields': ('account_type', 'is_advertiser', 'advertiser', 'blocked')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    filter_horizontal = ('blocked', 'invoices')
+    filter_horizontal = ('blocked',)
 
 
 class AdvertiserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'owner_name', 'phone', 'rating', 'package')
+    list_display = ('id', 'owner_name', 'phone', 'rating', 'package', 'is_active')
+    filter_horizontal = ('invoices',)
 
 
 class AccountTypeAdmin(admin.ModelAdmin):
@@ -29,3 +34,7 @@ admin.site.register(Advertiser, AdvertiserAdmin)
 admin.site.register(User, MyUserAdmin)
 admin.site.register(Package)
 admin.site.register(Invoice)
+
+admin.site.site_header = 'Sakan Admin Panel'
+admin.site.site_title = 'Sakan Admin Panel'
+admin.site.index_title = 'Sakan Admin Panel'

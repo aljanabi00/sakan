@@ -41,34 +41,76 @@ class UserSerializer(serializers.ModelSerializer):
         # fields = '__all__'
 
 
-class CreateUserSerializer(serializers.ModelSerializer):
-    account_type = serializers.IntegerField(write_only=True)
-    advertiser = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = User
-        # fields = '__all__'
-        exclude = (
-            'groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined',
-            'blocked',
-            'invoices', 'is_advertiser', 'is_active')
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
-
-    def create(self, validated_data):
-        account_type = validated_data.pop('account_type')
-        advertiser = validated_data.pop('advertiser')
-        user = User.objects.create(**validated_data)
-        user.set_password(validated_data['password'])
-        user.account_type = AccountType.objects.get(id=account_type)
-        user.advertiser = Advertiser.objects.get(id=advertiser)
-        user.save()
-        return user
-
+# class CreateUserSerializer(serializers.ModelSerializer):
+#     account_type = serializers.IntegerField(write_only=True)
+#     advertiser = serializers.IntegerField(write_only=True)
+#
+#     class Meta:
+#         model = User
+#         # fields = '__all__'
+#         exclude = (
+#             'groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined',
+#             'blocked',
+#             'invoices', 'is_advertiser', 'is_active')
+#         extra_kwargs = {
+#             'password': {'write_only': True}
+#         }
+#
+#     def create(self, validated_data):
+#         account_type = validated_data.pop('account_type')
+#         advertiser = validated_data.pop('advertiser')
+#         user = User.objects.create(**validated_data)
+#         user.set_password(validated_data['password'])
+#         user.account_type = AccountType.objects.get(id=account_type)
+#         user.advertiser = Advertiser.objects.get(id=advertiser)
+#         user.save()
+#         return user
+#
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         data['user'] = UserSerializer(self.user).data
         return data
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'blocked',
+                   'is_advertiser', 'is_active', 'advertiser', 'first_name', 'last_name', 'email')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
+        account_type = AccountType.objects.get_or_create(name__contains='باحث', defaults={'name': 'باحث'})
+        user.account_type = account_type[0]
+        user.is_advertiser = False
+        user.save()
+        return user
+
+
+class CreateAdvertiserSerializer(serializers.ModelSerializer):
+    advertiser_name = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        exclude = ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'blocked',
+                   'is_active', 'is_advertiser', 'account_type', 'first_name', 'last_name', 'email', 'advertiser')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def create(self, validated_data):
+        advertiser_name = validated_data.pop('advertiser_name')
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
+        account_type = AccountType.objects.get_or_create(name__contains='معلن', defaults={'name': 'معلن'})
+        user.account_type = account_type[0]
+        user.is_advertiser = True
+        user.advertiser = Advertiser.objects.create(owner_name=advertiser_name, phone=user.phone)
+        user.save()
+        return user

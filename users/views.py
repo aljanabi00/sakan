@@ -31,3 +31,14 @@ class CreateUserView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
         return Response(serializer.data)
+
+
+class CreateAdvertiserView(generics.CreateAPIView):
+    serializer_class = CreateAdvertiserSerializer
+    queryset = Advertiser.objects.all()
+    authentication_classes = ()
+    permission_classes = ()
+
+    def perform_create(self, serializer):
+        serializer.save()
+        return Response(serializer.data)

@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('packages/', PackageListView.as_view()),
     path('account-types/', AccountTypeListView.as_view()),
-    path('create-account/', CreateUserView.as_view()),
+    path('create-user/', CreateUserView.as_view()),
+    path('create-advertiser/', CreateAdvertiserView.as_view()),
 
 ]

@@ -39,12 +39,13 @@ class AccountType(models.Model):
 
 
 class Advertiser(models.Model):
-    office = models.CharField(max_length=255)
-    owner_name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255)
+    office = models.CharField(max_length=255, null=True, blank=True)
+    owner_name = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
     location = models.URLField(null=True, blank=True)
     rating = models.IntegerField(default=0)
     package = models.ForeignKey(Package, on_delete=models.CASCADE, null=True, blank=True)
+    invoices = models.ManyToManyField(Invoice, blank=True)
     is_active = models.BooleanField(default=False)
 
     def __str__(self):
@@ -52,9 +53,9 @@ class Advertiser(models.Model):
 
 
 class User(AbstractUser):
+    phone = models.CharField(max_length=16, null=True, blank=True)
     account_type = models.ForeignKey(AccountType, on_delete=models.CASCADE, null=True, blank=True)
     is_advertiser = models.BooleanField(default=False)
     advertiser = models.ForeignKey(Advertiser, on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     blocked = models.ManyToManyField('self', blank=True)
-    invoices = models.ManyToManyField(Invoice, blank=True)
