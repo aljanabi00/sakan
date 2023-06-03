@@ -28,6 +28,18 @@ class CreateUserView(generics.CreateAPIView):
     authentication_classes = ()
     permission_classes = ()
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            data = MyTokenObtainPairSerializer.validate(MyTokenObtainPairSerializer(), attrs={
+                'username': user.username,
+                'password': request.data['password']
+            })
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def perform_create(self, serializer):
         serializer.save()
         return Response(serializer.data)
@@ -38,6 +50,18 @@ class CreateAdvertiserView(generics.CreateAPIView):
     queryset = Advertiser.objects.all()
     authentication_classes = ()
     permission_classes = ()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            advertiser = serializer.save()
+            data = MyTokenObtainPairSerializer.validate(MyTokenObtainPairSerializer(), attrs={
+                'username': advertiser.username,
+                'password': request.data['password']
+            })
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save()
