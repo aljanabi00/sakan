@@ -9,6 +9,8 @@ class PropertyAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'price', 'for_what', 'advertiser')
     list_filter = ('for_what', 'features')
     search_fields = ('name', 'price', 'for_what', 'advertiser')
+    list_display_links = ('id', 'name')
+    filter_horizontal = ('features', 'images')
 
 
 class FeatureAdmin(admin.ModelAdmin):

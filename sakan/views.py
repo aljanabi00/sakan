@@ -12,6 +12,26 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     queryset = Property.objects.filter(is_visible=True).order_by('-created_at')
     serializer_class = PropertySerializer
 
+    def get_queryset(self):
+        query_params = self.request.query_params
+        try:
+            if 'offer' in query_params:
+                # get the for_what value from the query params
+                for_what = query_params['offer']
+                # check if the for_what value is valid
+                if for_what == 'rent':
+                    offer = Offer.objects.get(name='للإيجار')
+                    queryset = Property.objects.filter(for_what=offer, is_visible=True).order_by('-created_at')
+                    return queryset
+                elif for_what == 'sale':
+                    offer = Offer.objects.get(name='للبيع')
+                    queryset = Property.objects.filter(for_what=offer, is_visible=True).order_by('-created_at')
+                    return queryset
+                else:
+                    return Property.objects.filter(is_visible=True).order_by('-created_at')
+        except:
+            return Property.objects.filter(is_visible=True).order_by('-created_at')
+
     # check if the user is authenticated and advertiser to create a property
     def perform_create(self, serializer):
         if self.request.user.is_authenticated and self.request.user.is_advertiser:
