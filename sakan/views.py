@@ -1,12 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Property, Feature, Offer
 from .serializers import PropertySerializer, FeatureSerializer, OfferSerializer, CreatePropertySerializer
 
 
 class PropertyListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Property.objects.filter(is_visible=True).order_by('-created_at')
     serializer_class = PropertySerializer
 
@@ -42,6 +44,7 @@ class PropertyListCreateView(generics.ListCreateAPIView):
 
 
 class PropertyRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
 
