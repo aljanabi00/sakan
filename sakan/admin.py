@@ -17,7 +17,21 @@ class FeatureAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+class ProvinceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+
+
+class PropertyTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+
+
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+
+
 admin.site.register(Image)
 admin.site.register(Feature, FeatureAdmin)
 admin.site.register(Property, PropertyAdmin)
-admin.site.register(Offer)
+admin.site.register(Offer, OfferAdmin)
+admin.site.register(Province, ProvinceAdmin)
+admin.site.register(PropertyType, PropertyTypeAdmin)

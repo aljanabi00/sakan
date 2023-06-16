@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Property, Feature, Offer
-from .serializers import PropertySerializer, FeatureSerializer, OfferSerializer, CreatePropertySerializer
+from .models import Property, Feature, Offer, Province, PropertyType
+from .serializers import *
 
 
 class PropertyListCreateView(generics.ListCreateAPIView):
@@ -103,10 +103,34 @@ def get_property_fields(request):
             for_what_serializer = OfferSerializer(for_what, many=True)
             features = Feature.objects.all()
             features_serializer = FeatureSerializer(features, many=True)
+            provinces = Province.objects.all()
+            provinces_serializer = ProvinceSerializer(provinces, many=True)
+            property_types = PropertyType.objects.all()
+            property_types_serializer = PropertyTypeSerializer(property_types, many=True)
             return Response({
                 'for_what': for_what_serializer.data,
-                'features': features_serializer.data
+                'property_types': property_types_serializer.data,
+                'provinces': provinces_serializer.data,
+                'features': features_serializer.data,
             })
+        else:
+            raise PermissionDenied()
+    except:
+        raise PermissionDenied()
+
+
+@api_view(['GET'])
+def my_properties(request):
+    """
+    A function to get the properties of the logged in advertiser
+    :param request:
+    :return:
+    """
+    try:
+        if request.user.is_authenticated and request.user.is_advertiser:
+            properties = Property.objects.filter(advertiser=request.user)
+            serializer = PropertySerializer(properties, many=True)
+            return Response(serializer.data)
         else:
             raise PermissionDenied()
     except:
