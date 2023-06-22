@@ -23,6 +23,7 @@ class Feature(models.Model):
 
 class Offer(models.Model):
     name = models.CharField(max_length=255)
+    en_name = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -30,6 +31,7 @@ class Offer(models.Model):
 
 class PropertyType(models.Model):
     name = models.CharField(max_length=255)
+    en_name = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -37,6 +39,7 @@ class PropertyType(models.Model):
 
 class Province(models.Model):
     name = models.CharField(max_length=255)
+    en_name = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return self.name
