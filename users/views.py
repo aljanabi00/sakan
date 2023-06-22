@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
@@ -66,3 +67,11 @@ class CreateAdvertiserView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
         return Response(serializer.data)
+
+
+class MyAccountView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
