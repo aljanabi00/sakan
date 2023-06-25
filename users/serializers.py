@@ -111,6 +111,14 @@ class CreateAdvertiserSerializer(serializers.ModelSerializer):
         account_type = AccountType.objects.get_or_create(name__contains='معلن', defaults={'name': 'معلن'})
         user.account_type = account_type[0]
         user.is_advertiser = True
-        user.advertiser = Advertiser.objects.create(owner_name=advertiser_name, phone=user.phone)
+        package = Package.objects.get_or_create(name__contains='مجاني',
+                                                defaults={'name': 'مجاني', 'price': 0, 'can_edit': False,
+                                                          'property_limit': 0,
+                                                          'repost_limit': 0,
+                                                          'featured_limit': 0,
+                                                          'property_period': 0,
+                                                          'valid_for': 0})
+        package = package[0]
+        user.advertiser = Advertiser.objects.create(owner_name=advertiser_name, phone=user.phone, package=package)
         user.save()
         return user
