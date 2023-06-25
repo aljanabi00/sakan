@@ -30,10 +30,10 @@ class PropertyListCreateView(generics.ListCreateAPIView):
     # check if the user is authenticated and advertiser to create a property
     def perform_create(self, serializer):
         # if self.request.user.is_authenticated and self.request.user.is_advertiser:
-            # check if the property limit is reached
-            # if self.request.user.advertiser.is_active is True and Property.objects.filter(
-            #         advertiser=self.request.user).count() >= self.request.user.advertiser.package.property_limit:
-            #     raise PermissionDenied()
+        # check if the property limit is reached
+        # if self.request.user.advertiser.is_active is True and Property.objects.filter(
+        #         advertiser=self.request.user).count() >= self.request.user.advertiser.package.property_limit:
+        #     raise PermissionDenied()
         serializer.save(advertiser=self.request.user)
         # else:
         #     raise PermissionDenied()
@@ -42,13 +42,16 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if request.user.is_authenticated and request.user.is_advertiser:
             # check if the property limit is reached and the advertiser is active
-            if request.user.advertiser.is_active and Property.objects.filter(
-                    advertiser=request.user).count() <= request.user.advertiser.package.property_limit:
-                if serializer.is_valid():
-                    self.perform_create(serializer)
-                    return Response('Property created successfully', status=status.HTTP_201_CREATED)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
+            try:
+                if request.user.advertiser.is_active and Property.objects.filter(
+                        advertiser=request.user).count() <= request.user.advertiser.package.property_limit:
+                    if serializer.is_valid():
+                        self.perform_create(serializer)
+                        return Response('Property created successfully', status=status.HTTP_201_CREATED)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    raise PermissionDenied()
+            except:
                 raise PermissionDenied()
         else:
             raise PermissionDenied()
