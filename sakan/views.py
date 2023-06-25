@@ -29,18 +29,19 @@ class PropertyListCreateView(generics.ListCreateAPIView):
 
     # check if the user is authenticated and advertiser to create a property
     def perform_create(self, serializer):
-        if self.request.user.is_authenticated and self.request.user.is_advertiser:
+        # if self.request.user.is_authenticated and self.request.user.is_advertiser:
             # check if the property limit is reached
-            if self.request.user.advertiser.is_active is True and Property.objects.filter(
-                    advertiser=self.request.user).count() >= self.request.user.advertiser.package.property_limit:
-                raise PermissionDenied()
-            serializer.save(advertiser=self.request.user)
-        else:
-            raise PermissionDenied()
+            # if self.request.user.advertiser.is_active is True and Property.objects.filter(
+            #         advertiser=self.request.user).count() >= self.request.user.advertiser.package.property_limit:
+            #     raise PermissionDenied()
+        serializer.save(advertiser=self.request.user)
+        # else:
+        #     raise PermissionDenied()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if request.user.is_authenticated and request.user.is_advertiser:
+            # check if the property limit is reached and the advertiser is active
             if request.user.advertiser.is_active and Property.objects.filter(
                     advertiser=request.user).count() <= request.user.advertiser.package.property_limit:
                 if serializer.is_valid():
