@@ -145,6 +145,10 @@ class UpdateUserSerializer(serializers.ModelSerializer):
             advertiser_name = validated_data.pop('advertiser_name')
             instance.advertiser.owner_name = advertiser_name
             instance.advertiser.save()
+
+        if 'phone' in validated_data:
+            instance.advertiser.phone = validated_data['phone']
+            instance.save()
         return super().update(instance, validated_data)
 
 
