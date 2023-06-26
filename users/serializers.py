@@ -21,7 +21,7 @@ class AdvertiserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertiser
-        fields = '__all__'
+        exclude = ('invoices',)
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -125,19 +125,27 @@ class CreateAdvertiserSerializer(serializers.ModelSerializer):
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):
+    advertiser_name = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
         exclude = ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'blocked',
                    'is_active', 'is_advertiser', 'account_type', 'advertiser', 'first_name', 'last_name', 'email',
                    'password')
         extra_kwargs = {
-            'password': {'write_only': True}
+            'username': {'required': False},
         }
 
     def update(self, instance, validated_data):
-        instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+            instance.save()
+
+        if 'advertiser_name' in validated_data:
+            advertiser_name = validated_data.pop('advertiser_name')
+            instance.advertiser.owner_name = advertiser_name
+            instance.advertiser.save()
+        return super().update(instance, validated_data)
 
 
 class PayPackageSerializer(serializers.ModelSerializer):

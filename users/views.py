@@ -70,12 +70,29 @@ class CreateAdvertiserView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-class MyAccountView(generics.RetrieveUpdateAPIView):
+class MyAccountView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+class MyAccountUpdateView(generics.UpdateAPIView):
+    serializer_class = UpdateUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response('Account updated successfully', status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PackageView(generics.ListAPIView):
