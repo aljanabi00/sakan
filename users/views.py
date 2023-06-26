@@ -1,4 +1,5 @@
 from rest_framework import generics, status
+from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -69,9 +70,45 @@ class CreateAdvertiserView(generics.CreateAPIView):
         return Response(serializer.data)
 
 
-class MyAccountView(generics.RetrieveAPIView):
+class MyAccountView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+class PackageView(generics.ListAPIView):
+    """
+    A view to list all packages.
+    """
+    serializer_class = PackageSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Package.objects.all()
+
+
+class PayPackageView(generics.CreateAPIView):
+    """
+    A view to pay for a package that takes a package id and a package count.
+    """
+    serializer_class = PayPackageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        body = request.data
+        package = Package.objects.get(id=body['package_id'])
+        if request.user.is_authenticated and request.user.is_advertiser:
+            advertiser = Advertiser.objects.get(user=request.user)
+            if package != advertiser.package:
+                advertiser.package = package
+            for i in range(body['package_count']):
+                advertiser.package_count += 1
+                advertiser.property_limit += package.property_limit
+                advertiser.repost_limit += package.repost_limit
+                advertiser.featured_limit += package.featured_limit
+
+            advertiser.property_period = package.property_period
+            advertiser.save()
+            return Response('Package paid successfully', status=status.HTTP_200_OK)
+        else:
+            raise PermissionDenied()

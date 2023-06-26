@@ -122,3 +122,28 @@ class CreateAdvertiserSerializer(serializers.ModelSerializer):
         user.advertiser = Advertiser.objects.create(owner_name=advertiser_name, phone=user.phone, package=package)
         user.save()
         return user
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'blocked',
+                   'is_active', 'is_advertiser', 'account_type', 'advertiser', 'first_name', 'last_name', 'email',
+                   'password')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
+
+class PayPackageSerializer(serializers.ModelSerializer):
+    package_id = serializers.IntegerField(write_only=True)
+    package_count = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('package_id', 'package_count')

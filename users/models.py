@@ -26,7 +26,7 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.package.name + ' - ' + str(self.amount)
+        return self.package.name + ' - ' + str(self.amount) + ' - ' + self.date.strftime('%Y-%m-%d %H:%M:%S')
 
 
 class AccountType(models.Model):
@@ -45,6 +45,14 @@ class Advertiser(models.Model):
     location = models.URLField(null=True, blank=True)
     rating = models.IntegerField(default=0)
     package = models.ForeignKey(Package, on_delete=models.CASCADE, null=True, blank=True)
+    package_count = models.IntegerField(default=0)
+    package_requested_at = models.DateTimeField(auto_now=True)
+    package_paid_at = models.DateTimeField(null=True, blank=True)
+    package_expires_at = models.DateTimeField(null=True, blank=True)
+    property_limit = models.IntegerField(default=0)
+    repost_limit = models.IntegerField(default=0)
+    featured_limit = models.IntegerField(default=0)
+    property_period = models.IntegerField(default=0)
     invoices = models.ManyToManyField(Invoice, blank=True)
     is_active = models.BooleanField(default=False)
 

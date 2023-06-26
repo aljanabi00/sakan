@@ -43,10 +43,10 @@ class PropertyListCreateView(generics.ListCreateAPIView):
         if request.user.is_authenticated and request.user.is_advertiser:
             # check if the property limit is reached and the advertiser is active
             try:
-                if request.user.advertiser.is_active and Property.objects.filter(
-                        advertiser=request.user).count() <= request.user.advertiser.package.property_limit:
+                if request.user.advertiser.is_active and request.user.advertiser.property_limit > 0:
                     if serializer.is_valid():
                         self.perform_create(serializer)
+                        request.user.advertiser.property_limit -= 1
                         return Response('Property created successfully', status=status.HTTP_201_CREATED)
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
                 else:

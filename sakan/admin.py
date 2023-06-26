@@ -1,4 +1,9 @@
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+
 from .models import *
 
 
@@ -6,11 +11,19 @@ from .models import *
 
 
 class PropertyAdmin(admin.ModelAdmin):
+    change_form_template = 'property.html'
     list_display = ('id', 'name', 'price', 'for_what', 'advertiser')
     list_filter = ('for_what', 'features')
     search_fields = ('name', 'price', 'for_what', 'advertiser')
     list_display_links = ('id', 'name')
     filter_horizontal = ('features', 'images')
+
+    def response_change(self, request, obj):
+        if "_post_property" in request.POST:
+            obj.is_visible = True
+            obj.expires_at = datetime.now() + relativedelta(months=obj.advertiser.advertiser.package.property_period)
+            obj.save()
+            return HttpResponseRedirect(".")
 
 
 class FeatureAdmin(admin.ModelAdmin):
