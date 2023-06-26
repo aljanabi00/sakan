@@ -39,6 +39,8 @@ class PropertySerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=True)
     for_what = OfferSerializer(read_only=True)
     advertiser = UserSerializer(read_only=True)
+    property_type = PropertyTypeSerializer(read_only=True)
+    province = ProvinceSerializer(read_only=True)
 
     class Meta:
         model = Property
