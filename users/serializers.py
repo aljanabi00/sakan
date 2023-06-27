@@ -130,9 +130,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('groups', 'user_permissions', 'is_staff', 'is_superuser', 'last_login', 'date_joined', 'blocked',
-                   'is_active', 'is_advertiser', 'account_type', 'advertiser', 'first_name', 'last_name', 'email',
-                   'password')
+                   'is_active', 'is_advertiser', 'account_type', 'advertiser')
         extra_kwargs = {
+            'password': {'write_only': True, 'required': False},
             'username': {'required': False},
         }
 
