@@ -24,6 +24,7 @@ class PropertyAdmin(admin.ModelAdmin):
             obj.expires_at = datetime.now() + relativedelta(months=obj.advertiser.advertiser.package.property_period)
             obj.save()
             return HttpResponseRedirect(".")
+        return super().response_change(request, obj)
 
 
 class FeatureAdmin(admin.ModelAdmin):
@@ -42,9 +43,15 @@ class OfferAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
+class StatisticAdmin(admin.ModelAdmin):
+    list_display = ('id', 'visitors', 'show_number', 'call_number', 'whatsapp_number', 'sms_messages', 'share', 'status')
+
+
 admin.site.register(Image)
 admin.site.register(Feature, FeatureAdmin)
 admin.site.register(Property, PropertyAdmin)
 admin.site.register(Offer, OfferAdmin)
 admin.site.register(Province, ProvinceAdmin)
 admin.site.register(PropertyType, PropertyTypeAdmin)
+admin.site.register(Status)
+admin.site.register(Statistic)

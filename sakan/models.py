@@ -45,6 +45,36 @@ class Province(models.Model):
         return self.name
 
 
+class Status(models.Model):
+    name = models.CharField(max_length=255)
+    en_name = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get_default_pk(cls):
+        return Status.objects.get_or_create(en_name='pending', name='قيد التدقيق')[0].pk
+
+
+class Statistic(models.Model):
+    price = models.IntegerField(default=0)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    en_name = models.CharField(max_length=255, null=True, blank=True)
+    visitors = models.IntegerField(default=0)
+    show_number = models.IntegerField(default=0)
+    call_number = models.IntegerField(default=0)
+    whatsapp_number = models.IntegerField(default=0)
+    sms_messages = models.IntegerField(default=0)
+    share = models.IntegerField(default=0)
+    status = models.ForeignKey(Status, on_delete=models.CASCADE, null=True, blank=True,
+                               default=Status.get_default_pk)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'statistic for ' + str(self.id)
+
+
 class Property(models.Model):
     name = models.CharField(max_length=255)
     price = models.CharField(max_length=255)
@@ -70,6 +100,7 @@ class Property(models.Model):
     is_visible = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
+    statistics = models.ForeignKey(Statistic, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name

@@ -139,3 +139,32 @@ def my_properties(request):
             raise PermissionDenied()
     except:
         raise PermissionDenied()
+
+
+class UpdatePropertyStatistics(generics.UpdateAPIView):
+    queryset = Statistic.objects.all()
+    serializer_class = UpdateStatisticSerializer
+    authentication_classes = []
+    permission_classes = []
+
+    def perform_update(self, serializer):
+        statistic = self.get_object()
+        action = self.request.data['action']
+        if action == 'visit':
+            statistic.visitors += 1
+        elif action == 'show_number':
+            statistic.show_number += 1
+        elif action == 'call':
+            statistic.call_number += 1
+        elif action == 'whatsapp':
+            statistic.whatsapp_number += 1
+        elif action == 'message':
+            statistic.sms_messages += 1
+        elif action == 'share':
+            statistic.share += 1
+        statistic.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        property = Property.objects.get(id=self.kwargs['pk'])
+        return property.statistics

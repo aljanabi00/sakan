@@ -8,4 +8,5 @@ urlpatterns = [
     path('features/', FeaturesListView.as_view()),
     path('features/<int:pk>/', FeaturesRetrieveView.as_view()),
     path('fields/', get_property_fields),
+    path('update-statistics/<int:pk>/', UpdatePropertyStatistics.as_view()),
 ]

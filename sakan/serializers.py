@@ -34,6 +34,29 @@ class PropertyTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+
+class StatisticSerializer(serializers.ModelSerializer):
+    status = StatusSerializer(read_only=True)
+
+    class Meta:
+        model = Statistic
+        fields = '__all__'
+
+
+class UpdateStatisticSerializer(serializers.ModelSerializer):
+    actions = ('visit', 'show_number', 'call', 'whatsapp', 'message', 'share')
+    action = serializers.MultipleChoiceField(choices=actions, write_only=True)
+
+    class Meta:
+        model = Statistic
+        fields = ('action',)
+
+
 class PropertySerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)
     features = FeatureSerializer(many=True, read_only=True)
@@ -41,6 +64,7 @@ class PropertySerializer(serializers.ModelSerializer):
     advertiser = UserSerializer(read_only=True)
     property_type = PropertyTypeSerializer(read_only=True)
     province = ProvinceSerializer(read_only=True)
+    statistics = StatisticSerializer(read_only=True)
 
     class Meta:
         model = Property
@@ -75,5 +99,6 @@ class CreatePropertySerializer(serializers.ModelSerializer):
         property.for_what = Offer.objects.get(id=for_what)
         property.property_type = PropertyType.objects.get(id=property_type)
         property.province = Province.objects.get(id=province)
+        property.statistics = Statistic.objects.create(price=property.price)
         property.save()
         return property
