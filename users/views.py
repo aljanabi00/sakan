@@ -130,3 +130,18 @@ class PayPackageView(generics.CreateAPIView):
             return Response('Package paid successfully', status=status.HTTP_200_OK)
         else:
             raise PermissionDenied()
+
+
+class MyInvoices(generics.ListAPIView):
+    """
+    A view to list all invoices of an advertiser.
+    """
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.is_advertiser:
+            advertiser = Advertiser.objects.get(user=self.request.user)
+            return Invoice.objects.filter(advertiser=advertiser).order_by('-date')
+        else:
+            raise PermissionDenied()

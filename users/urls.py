@@ -21,5 +21,6 @@ urlpatterns = [
 
     path('packages/', PackageListView.as_view(), name='packages'),
     path('packages/pay/', PayPackageView.as_view(), name='pay-package'),
+    path('my-invoices/', MyInvoices.as_view(), name='my-invoices'),
 
 ]
