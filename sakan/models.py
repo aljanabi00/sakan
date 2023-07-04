@@ -98,6 +98,7 @@ class Property(models.Model):
     features = models.ManyToManyField(Feature, blank=True, related_name="feature")
     advertiser = models.ForeignKey('users.User', on_delete=models.CASCADE)
     is_visible = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     statistics = models.ForeignKey(Statistic, on_delete=models.CASCADE, null=True, blank=True)

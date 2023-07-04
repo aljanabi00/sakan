@@ -45,6 +45,11 @@ class PropertyListCreateView(generics.ListCreateAPIView):
             try:
                 if request.user.advertiser.is_active and request.user.advertiser.property_limit > 0:
                     if serializer.is_valid():
+                        if serializer.validated_data['is_featured']:
+                            if request.user.advertiser.featured_property_limit > 0:
+                                request.user.advertiser.featured_property_limit -= 1
+                            else:
+                                raise PermissionDenied()
                         self.perform_create(serializer)
                         request.user.advertiser.property_limit -= 1
                         return Response('Property created successfully', status=status.HTTP_201_CREATED)
@@ -168,3 +173,26 @@ class UpdatePropertyStatistics(generics.UpdateAPIView):
     def get_object(self):
         property = Property.objects.get(id=self.kwargs['pk'])
         return property.statistics
+
+
+class FilterPropertyByType(generics.ListAPIView):
+    serializer_class = PropertySerializer
+
+    def get_queryset(self):
+        property_type = PropertyType.objects.get(id=self.kwargs['pk'])
+        return Property.objects.filter(property_type=property_type, is_visible=True).order_by('-created_at')
+
+
+class FilterPropertyByProvince(generics.ListAPIView):
+    serializer_class = PropertySerializer
+
+    def get_queryset(self):
+        province = Province.objects.get(id=self.kwargs['pk'])
+        return Property.objects.filter(province=province, is_visible=True).order_by('-created_at')
+
+
+class FeaturedPropertiesListView(generics.ListAPIView):
+    serializer_class = PropertySerializer
+
+    def get_queryset(self):
+        return Property.objects.filter(is_featured=True, is_visible=True).order_by('-created_at')
