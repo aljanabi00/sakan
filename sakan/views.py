@@ -1,6 +1,12 @@
-from rest_framework import generics, status
+import coreapi
+import coreschema
+from django.db.models import Q
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import BaseFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Property, Feature, Offer, Province, PropertyType
@@ -179,7 +185,7 @@ class FilterPropertyByType(generics.ListAPIView):
     serializer_class = PropertySerializer
 
     def get_queryset(self):
-        property_type = PropertyType.objects.get(id=self.kwargs['pk'])
+        property_type = PropertyType.objects.get(id=self.kwargs['id'])
         return Property.objects.filter(property_type=property_type, is_visible=True).order_by('-created_at')
 
 
@@ -187,7 +193,7 @@ class FilterPropertyByProvince(generics.ListAPIView):
     serializer_class = PropertySerializer
 
     def get_queryset(self):
-        province = Province.objects.get(id=self.kwargs['pk'])
+        province = Province.objects.get(id=self.kwargs['id'])
         return Property.objects.filter(province=province, is_visible=True).order_by('-created_at')
 
 
@@ -196,3 +202,85 @@ class FeaturedPropertiesListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Property.objects.filter(is_featured=True, is_visible=True).order_by('-created_at')
+
+
+class PropertyFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name='price_from', required=False, location='query', schema=coreschema.Integer(),
+                          description='price from', type='integer', example=1000000),
+            coreapi.Field(name='price_to', required=False, location='query', schema=coreschema.Integer(),
+                          description='price to', type='integer', example=1000000),
+            coreapi.Field(name='property_type', required=False, location='query', schema=coreschema.Integer(),
+                          description='property type', type='integer', example=1),
+            coreapi.Field(name='province', required=False, location='query', schema=coreschema.Integer(),
+                          description='province', type='integer', example=1),
+            coreapi.Field(name='city', required=False, location='query', schema=coreschema.String(), description='city',
+                          type='string', example='tehran'),
+            coreapi.Field(name='street', required=False, location='query', schema=coreschema.String(),
+                          description='street', type='string', example='valiasr'),
+            coreapi.Field(name='rooms', required=False, location='query', schema=coreschema.Integer(),
+                          description='rooms', type='integer', example=1),
+            coreapi.Field(name='bathrooms', required=False, location='query', schema=coreschema.Integer(),
+                          description='bathrooms', type='integer', example=1),
+            coreapi.Field(name='area', required=False, location='query', schema=coreschema.Integer(),
+                          description='area',
+                          type='integer', example=100),
+            coreapi.Field(name='building_area', required=False, location='query', schema=coreschema.Integer(),
+                          description='building area', type='integer', example=100),
+
+        ]
+        return fields
+
+
+class PropertySearchView(generics.ListAPIView):
+    """
+    A class to search for properties based on the given parameters
+    """
+    serializer_class = PropertySerializer
+    filter_backends = [PropertyFilter]
+
+    def list(self, request, *args, **kwargs):
+        filters = Q(is_visible=True)
+        price_from = self.request.query_params.get('price_from')
+        price_to = self.request.query_params.get('price_to')
+        property_type = self.request.query_params.get('property_type')
+        province = self.request.query_params.get('province')
+        city = self.request.query_params.get('city')
+        street = self.request.query_params.get('street')
+        rooms = self.request.query_params.get('rooms')
+        bathrooms = self.request.query_params.get('bathrooms')
+        area = self.request.query_params.get('area')
+        building_area = self.request.query_params.get('building_area')
+
+        if price_from:
+            filters &= Q(price__gte=price_from)
+        if price_to:
+            filters &= Q(price__lte=price_to)
+        if property_type:
+            filters &= Q(property_type=property_type)
+        if province:
+            filters &= Q(province=province)
+        if city:
+            filters &= Q(city__search=city)
+        if street:
+            filters &= Q(street__search=street)
+        if rooms:
+            filters &= Q(rooms=rooms)
+        if bathrooms:
+            filters &= Q(bathrooms=bathrooms)
+        if area:
+            filters &= Q(area=area)
+        if building_area:
+            filters &= Q(building_area=building_area)
+
+        properties = Property.objects.filter(filters)
+        properties = properties.order_by('-created_at')
+
+        page = self.paginate_queryset(properties)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(properties, many=True)
+        return Response(serializer.data)
