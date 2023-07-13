@@ -9,6 +9,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from users.models import Advertiser
 from .models import Property, Feature, Offer, Province, PropertyType
 from .serializers import *
 
@@ -134,22 +136,30 @@ def get_property_fields(request):
         raise PermissionDenied()
 
 
-@api_view(['GET'])
-def my_properties(request):
-    """
-    A function to get the properties of the logged in advertiser
-    :param request:
-    :return:
-    """
-    try:
-        if request.user.is_authenticated and request.user.is_advertiser:
-            properties = Property.objects.filter(advertiser=request.user)
-            serializer = PropertySerializer(properties, many=True)
-            return Response(serializer.data)
-        else:
-            raise PermissionDenied()
-    except:
-        raise PermissionDenied()
+# @api_view(['GET'])
+# def my_properties(request):
+#     """
+#     A function to get the properties of the logged in advertiser
+#     :param request:
+#     :return:
+#     """
+#     try:
+#         if request.user.is_authenticated and request.user.is_advertiser:
+#             properties = Property.objects.filter(advertiser=request.user)
+#             serializer = PropertySerializer(properties, many=True)
+#             return Response(serializer.data)
+#         else:
+#             raise PermissionDenied()
+#     except:
+#         raise PermissionDenied()
+
+
+class ListMyProperties(generics.ListAPIView):
+    serializer_class = PropertySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Property.objects.filter(advertiser=self.request.user)
 
 
 class UpdatePropertyStatistics(generics.UpdateAPIView):
@@ -284,3 +294,20 @@ class PropertySearchView(generics.ListAPIView):
 
         serializer = self.get_serializer(properties, many=True)
         return Response(serializer.data)
+
+
+class PropertyListByIds(generics.ListAPIView):
+    serializer_class = PropertySerializer
+
+    def get_queryset(self):
+        ids = self.request.query_params.get('ids')
+        ids = ids.split(',')
+        return Property.objects.filter(id__in=ids)
+
+
+class PropertyListByAdvertiser(generics.ListAPIView):
+    serializer_class = PropertySerializer
+
+    def get_queryset(self):
+        advertiser = Advertiser.objects.get(id=self.kwargs['id'])
+        return Property.objects.filter(advertiser=advertiser, is_visible=True).order_by('-created_at')

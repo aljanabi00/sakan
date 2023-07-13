@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('', PropertyListCreateView.as_view()),
-    path('my-properties/', my_properties, name='my-properties'),
+    path('my-properties/', ListMyProperties.as_view(), name='my-properties'),
     path('<int:pk>/', PropertyRetrieveUpdateDestroyView.as_view()),
     path('features/', FeaturesListView.as_view()),
     path('features/<int:pk>/', FeaturesRetrieveView.as_view()),
@@ -13,4 +13,6 @@ urlpatterns = [
     path('filter-properties-province/<int:id>/', FilterPropertyByProvince.as_view()),
     path('featured-properties/', FeaturedPropertiesListView.as_view()),
     path('search/', PropertySearchView.as_view()),
+    path('list-by-ids/', PropertyListByIds.as_view()),
+    path('list-by-advertiser/', PropertyListByAdvertiser.as_view()),
 ]
