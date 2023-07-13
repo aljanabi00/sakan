@@ -14,5 +14,5 @@ urlpatterns = [
     path('featured-properties/', FeaturedPropertiesListView.as_view()),
     path('search/', PropertySearchView.as_view()),
     path('list-by-ids/', PropertyListByIds.as_view()),
-    path('list-by-advertiser/', PropertyListByAdvertiser.as_view()),
+    path('list-by-advertiser/<int:id>/', PropertyListByAdvertiser.as_view()),
 ]

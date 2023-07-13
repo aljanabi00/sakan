@@ -10,7 +10,7 @@ from rest_framework.filters import BaseFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from users.models import Advertiser
+from users.models import Advertiser, User
 from .models import Property, Feature, Offer, Province, PropertyType
 from .serializers import *
 
@@ -296,11 +296,21 @@ class PropertySearchView(generics.ListAPIView):
         return Response(serializer.data)
 
 
+class ListByIdsFilter(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        fields = [
+            coreapi.Field(name='ids', required=True, location='query', schema=coreschema.String(),
+                          description='ids', type='string', example='[1,2,3]'),
+        ]
+        return fields
+
+
 class PropertyListByIds(generics.ListAPIView):
     serializer_class = PropertySerializer
+    filter_backends = [ListByIdsFilter]
 
     def get_queryset(self):
-        ids = self.request.query_params.get('ids')
+        ids = self.request.query_params.get('ids').strip().replace('[', '').replace(']', '')
         ids = ids.split(',')
         return Property.objects.filter(id__in=ids)
 
@@ -308,6 +318,10 @@ class PropertyListByIds(generics.ListAPIView):
 class PropertyListByAdvertiser(generics.ListAPIView):
     serializer_class = PropertySerializer
 
-    def get_queryset(self):
-        advertiser = Advertiser.objects.get(id=self.kwargs['id'])
-        return Property.objects.filter(advertiser=advertiser, is_visible=True).order_by('-created_at')
+    def get_queryset(self, *args, **kwargs):
+        try:
+            advertiser = Advertiser.objects.get(id=self.kwargs['id'])
+            return Property.objects.filter(advertiser=User.objects.get(advertiser=advertiser),
+                                           is_visible=True).order_by('-created_at')
+        except:
+            return []
